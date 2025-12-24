@@ -12,8 +12,8 @@ namespace fs = std::filesystem;
 // IMPLEMENTATION (STB)
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "include/stb_image.h"
-#include "include/stb_image_write.h"
+#include "stb_image.h"
+#include "stb_image_write.h"
 
 // --- FILTER LOGIC ---
 
@@ -123,8 +123,8 @@ void runParallel(int numThreads, int height, Func f, Args... args) {
 
 // --- MAIN ---
 int main() {
-    std::string inputFolder = "../images";
-    std::string outputFolder = "../output";
+    std::string inputFolder = "../data/images";
+    std::string outputFolder = "../output/threads";
     
     // --- !!! CHANGE THIS NUMBER FOR YOUR EXPERIMENTS !!! ---
     int numThreads = 8;  // Try 1, 2, 4, 8
@@ -159,23 +159,23 @@ int main() {
         // 1. Grayscale
         memcpy(grayImg, img, imgSize);
         runParallel(numThreads, height, filterGrayscale, grayImg, width, channels);
-        stbi_write_jpg((outputFolder + "/gray_" + filename).c_str(), width, height, channels, grayImg, 100);
+        //stbi_write_jpg((outputFolder + "/gray_" + filename).c_str(), width, height, channels, grayImg, 100);
 
         // 2. Blur
         runParallel(numThreads, height, filterBlur, img, outputImg, width, height, channels);
-        stbi_write_jpg((outputFolder + "/blur_" + filename).c_str(), width, height, channels, outputImg, 100);
+        //stbi_write_jpg((outputFolder + "/blur_" + filename).c_str(), width, height, channels, outputImg, 100);
 
         // 3. Edge
         runParallel(numThreads, height, filterEdge, img, outputImg, width, height, channels);
-        stbi_write_jpg((outputFolder + "/edge_" + filename).c_str(), width, height, channels, outputImg, 100);
+        //stbi_write_jpg((outputFolder + "/edge_" + filename).c_str(), width, height, channels, outputImg, 100);
 
         // 4. Sharpen
         runParallel(numThreads, height, filterSharpen, img, outputImg, width, height, channels);
-        stbi_write_jpg((outputFolder + "/sharp_" + filename).c_str(), width, height, channels, outputImg, 100);
+        //stbi_write_jpg((outputFolder + "/sharp_" + filename).c_str(), width, height, channels, outputImg, 100);
 
         // 5. Brightness
         runParallel(numThreads, height, filterBrightness, img, outputImg, width, channels, 50);
-        stbi_write_jpg((outputFolder + "/bright_" + filename).c_str(), width, height, channels, outputImg, 100);
+        //stbi_write_jpg((outputFolder + "/bright_" + filename).c_str(), width, height, channels, outputImg, 100);
 
         stbi_image_free(img);
         free(outputImg);

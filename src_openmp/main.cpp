@@ -154,23 +154,23 @@ int main(int argc, char* argv[]) {
 
         // 1. Grayscale (Save as 1 channel JPG)
         applyGrayscale(img, grayImg, width, height, channels);
-        stbi_write_jpg((outputFolder + "/gray_" + filename).c_str(), width, height, 1, grayImg, 100);
+        //stbi_write_jpg((outputFolder + "/gray_" + filename).c_str(), width, height, 1, grayImg, 100);
 
         // 2. Blur
         applyBlur(img, outputImg, width, height, channels);
-        stbi_write_jpg((outputFolder + "/blur_" + filename).c_str(), width, height, channels, outputImg, 100);
+        //stbi_write_jpg((outputFolder + "/blur_" + filename).c_str(), width, height, channels, outputImg, 100);
 
         // 3. Edge (Sobel)
         applyEdge(img, outputImg, width, height, channels);
-        stbi_write_jpg((outputFolder + "/edge_" + filename).c_str(), width, height, channels, outputImg, 100);
+        //stbi_write_jpg((outputFolder + "/edge_" + filename).c_str(), width, height, channels, outputImg, 100);
 
         // 4. Sharpen
         applySharpen(img, outputImg, width, height, channels);
-        stbi_write_jpg((outputFolder + "/sharp_" + filename).c_str(), width, height, channels, outputImg, 100);
+        //stbi_write_jpg((outputFolder + "/sharp_" + filename).c_str(), width, height, channels, outputImg, 100);
 
         // 5. Brightness
         applyBrightness(img, outputImg, width, height, channels, 50);
-        stbi_write_jpg((outputFolder + "/bright_" + filename).c_str(), width, height, channels, outputImg, 100);
+        //stbi_write_jpg((outputFolder + "/bright_" + filename).c_str(), width, height, channels, outputImg, 100);
 
         // Cleanup
         stbi_image_free(img);
