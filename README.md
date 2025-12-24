@@ -23,4 +23,8 @@ CST435_Assignment2/
 ├── include/           # Header-only libraries (stb_image)
 ├── src_openmp/        # Source code for OpenMP implementation
 ├── src_threads/       # Source code for std::thread implementation
+<<<<<<< HEAD
 └── README.md          # Project documentation
+=======
+└── README.md          # Project documentation
+>>>>>>> ebc8eee95ae7b058e9b2eb382837a6ccec412084
