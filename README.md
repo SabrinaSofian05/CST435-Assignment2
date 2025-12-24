@@ -1,13 +1,13 @@
-# CST435 Assignment 2: Parallel Image Processing System
+# CST435 Assignment 2: Parallel Image Processing on Google Cloud Platform (GCP)
 
 ## 👥 Team Information
-* **Course:** CST435 Parallel and Distributed Computing
+* **Course:** CST435-Parallel and Cloud Computing
 * **Group:** Group 46
 * **Members:**
-  1. [Name 1] ([Matric No])
-  2. [Name 2] ([Matric No])
-  3. [Name 3] ([Matric No])
-  4. [Name 4] ([Matric No])
+  1. [AIN NABIHAH BINTI MAHAMAD CHAH PARI] ([162321])
+  2. [JASMINE BINTI MOHD SHAIFUL ADLI CHUNG] ([164191])
+  3. [WAN NURMAISARAH BINTI WAN MUSLIM ] ([164323])
+  4. [SABRINA BINTI SOFIAN] ([164740])
 
 ---
 
