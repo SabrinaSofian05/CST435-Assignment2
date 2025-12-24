@@ -42,8 +42,8 @@ If you get "Permission denied" error, please check the folder access with:
  ```bash
 ls -ld /home/shared/CST435-Assignment2
   ```
-  >>> The output should show at least r-x (read & execute) for others.
-  >>> If not, please contact the repo owner to fix permission. 
+  > The output should show at least r-x (read & execute) for others.
+  > If not, please contact the repo owner to fix permission. 
 ---
 
 ## Execution Guide
