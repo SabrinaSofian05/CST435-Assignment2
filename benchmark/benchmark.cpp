@@ -4,41 +4,44 @@
 #include <cstdlib>  
 #include <fstream>  
 #include <iomanip>  
+#include <algorithm> // Added for trimming
 
 using namespace std;
 
-// Structure to hold data from a single run
 struct RunStats {
     string time = "N/A";
     string count = "0";
 };
 
-// Structure for the final summary table
 struct Summary {
     int threads;
     string ompTime;
     string thrTime;
 };
 
+// Improved helper to trim whitespace and carriage returns (important for Linux)
+string cleanString(string s) {
+    s.erase(0, s.find_first_not_of(" \t\r\n"));
+    s.erase(s.find_last_not_of(" \t\r\n") + 1);
+    return s;
+}
+
 RunStats runAndGetStats(string cmd) {
-    string fullCmd = cmd + " > temp_output.txt"; 
-    int result = system(fullCmd.c_str());
+    // 1. Redirect both standard output and errors (2>&1)
+    string fullCmd = cmd + " > temp_output.txt 2>&1"; 
+    system(fullCmd.c_str());
     
     RunStats stats;
-    if (result != 0) return stats;
-
     ifstream file("temp_output.txt");
     string line;
+    
     while (getline(file, line)) {
-        // Look for Time
+        // Use find for case-insensitive-like matching or exact match
         if (line.find("TOTAL TIME:") != string::npos) {
-            stats.time = line.substr(line.find(":") + 1);
-            stats.time.erase(0, stats.time.find_first_not_of(" ")); // Trim
+            stats.time = cleanString(line.substr(line.find(":") + 1));
         }
-        // Look for Image Count
         if (line.find("Images Processed:") != string::npos) {
-            stats.count = line.substr(line.find(":") + 1);
-            stats.count.erase(0, stats.count.find_first_not_of(" ")); // Trim
+            stats.count = cleanString(line.substr(line.find(":") + 1));
         }
     }
     file.close();
@@ -50,25 +53,26 @@ int main() {
     vector<Summary> summaryList;
 
     cout << "===========================================" << endl;
-    cout << "   PARALLEL EXECUTION BENCHMARK" << endl;
+    cout << "   PARALLEL EXECUTION BENCHMARK (LINUX)" << endl;
     cout << "===========================================" << endl;
 
-    // Compile
-    system("g++ ../src_openmp/main.cpp -o ../src_openmp/main.exe -fopenmp -std=c++17 -I../include");
-    system("g++ ../src_threads/main.cpp -o ../src_threads/main.exe -pthread -std=c++17 -I../include");
+    // --- CHANGE 1: Compile without .exe extension for Linux ---
+    cout << "Compiling implementations..." << endl;
+    system("g++ ../src_openmp/main.cpp -o ../src_openmp/main_omp -fopenmp -std=c++17 -I../include");
+    system("g++ ../src_threads/main.cpp -o ../src_threads/main_thr -pthread -std=c++17 -I../include");
 
     for (int t : threadCounts) {
         cout << "\n>>>> RUNNING WITH " << t << " THREAD(S) <<<<" << endl;
         
-        // --- OpenMP Run ---
+        // --- CHANGE 2: Use Forward Slashes (/) and remove .exe ---
+        // Also added "./" to ensure Linux looks in the correct relative path
         cout << "OpenMP Implementation:" << endl;
-        RunStats omp = runAndGetStats("..\\src_openmp\\main.exe " + to_string(t));
+        RunStats omp = runAndGetStats("../src_openmp/main_omp " + to_string(t));
         cout << "  - Images Processed: " << omp.count << endl;
         cout << "  - Total Time      : " << omp.time << endl;
 
-        // --- Threads Run ---
         cout << "\nC++ Threads Implementation:" << endl;
-        RunStats thr = runAndGetStats("..\\src_threads\\main.exe " + to_string(t));
+        RunStats thr = runAndGetStats("../src_threads/main_thr " + to_string(t));
         cout << "  - Images Processed: " << thr.count << endl;
         cout << "  - Total Time      : " << thr.time << endl;
         cout << "-------------------------------------------" << endl;
@@ -91,6 +95,7 @@ int main() {
     }
     cout << "+----------+-----------------+-----------------+" << endl;
     
-    system("del temp_output.txt");
+    // --- CHANGE 3: Use 'rm' instead of 'del' for Linux ---
+    system("rm temp_output.txt");
     return 0;
 }
