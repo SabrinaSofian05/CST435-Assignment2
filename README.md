@@ -4,10 +4,10 @@
 * **Course:** CST435-Parallel and Cloud Computing
 * **Group:** Group 46
 * **Members:**
-  1. AIN NABIHAH BINTI MAHAMAD CHAH PARI (162321)
-  2. JASMINE BINTI MOHD SHAIFUL ADLI CHUNG (164191)
-  3. WAN NURMAISARAH BINTI WAN MUSLIM (164323)
-  4. SABRINA BINTI SOFIAN (164740)
+  1. Ain Nabihah Binti Mahamad Chah Pari (162321)
+  2. Jasmine Binti Mohd Shaiful Adli Chung(164191)
+  3. Wan Nurmaisarah Binti Wan Muslim (164323)
+  4. Sabrina Binti Sofian (164740)
 
 ---
 
