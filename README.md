@@ -33,7 +33,17 @@ This project was developed and tested on a **Google Cloud Platform (GCP) Compute
 > (`cst435-parallel-vm-assignment2`). 
 Group members only need to SSH into the VM to run the code.
 
+#### Navigate to project
+ ```bash
+ cd /home/shared/CST435-Assignment2
+  ```
 
+If you get "Permission denied" error, please check the folder access with:
+ ```bash
+ls -ld /home/shared/CST435-Assignment2
+  ```
+  >>> The output should show at least r-x (read & execute) for others.
+  >>> If not, please contact the repo owner to fix permission. 
 ---
 
 ## Execution Guide
@@ -56,9 +66,12 @@ g++ main.cpp -o main -fopenmp -std=c++17 -I../include
 #### C++ Threads Implementation:
 ```bash
 cd /home/shared/CST435-Assignment2/src_threads
-g++ main.cpp -o main -fopenmp -std=c++17 -I../include
+g++ main.cpp -o main -pthread -std=c++17 -I../include
 ./main 4 #(4 threads)
 ```
+
+#### All commands assume the repo is in /home/shared/CST435-Assignment2
+
 ---
 
 ## 📂 Project Structure
