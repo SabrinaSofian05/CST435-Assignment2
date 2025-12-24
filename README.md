@@ -18,12 +18,30 @@ This system implements a high-performance image processing pipeline that applies
 
 ---
 
+## 🛠 Installation & Environmental Setup
+
+### 1. Cloud Environment (Google Cloud Platform)
+
+This project was developed and tested on a **Google Cloud Platform (GCP) Compute Engine** instance with the following configuration:
+
+- **VM Instance Name:** `cst435-parallel-vm-assignment2`  
+- **Machine Type:** e2-standard-4 (4 vCPUs, 16 GB memory)  
+- **Operating System:** Ubuntu 22.04 LTS  
+- **Region:** us-central1-c 
+
+> **Note:** All required system dependencies have been pre-installed on the shared GCP VM  
+> (`cst435-parallel-vm-assignment2`). 
+Group members only need to SSH into the VM to run the code.
+
+
+---
+
 ## Execution Guide
 ### Option 1: Benchmark File
 The Benchmark Manager automatically compiles both implementations and runs them across 1, 2, 4, and 8 threads to generate a live comparison table.
 
 ```bash
-cd benchmark
+cd /home/shared/CST435-Assignment2/benchmark
 g++ benchmark.cpp -o manager
 ./manager 
 ```
@@ -31,13 +49,13 @@ g++ benchmark.cpp -o manager
 ### Option 2: Manual Execution (in folder openmp / threads)
 #### OpenMP Implementation: 
 ```bash
-cd src_openmp
+cd /home/shared/CST435-Assignment2/src_openmp
 g++ main.cpp -o main -fopenmp -std=c++17 -I../include
 ./main 4 #(4 threads)
 ```
 #### C++ Threads Implementation:
 ```bash
-cd src_threads
+cd /home/shared/CST435-Assignment2/src_threads
 g++ main.cpp -o main -fopenmp -std=c++17 -I../include
 ./main 4 #(4 threads)
 ```
