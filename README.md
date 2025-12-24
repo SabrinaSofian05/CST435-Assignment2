@@ -44,6 +44,13 @@ ls -ld /home/shared/CST435-Assignment2
   ```
   > The output should show at least r-x (read & execute) for others.
   > If not, please contact the repo owner to fix permission. 
+
+
+#### Pull the latest update from GitHub repository
+ ```bash
+git pull origin main
+  ```
+
 ---
 
 ## Execution Guide
