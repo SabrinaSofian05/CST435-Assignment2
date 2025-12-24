@@ -20,7 +20,7 @@ This system implements a high-performance image processing pipeline that applies
 
 ## 🛠 Installation & Environmental Setup
 
-### 1. Cloud Environment (Google Cloud Platform)
+### Cloud Environment (Google Cloud Platform)
 
 This project was developed and tested on a **Google Cloud Platform (GCP) Compute Engine** instance with the following configuration:
 
