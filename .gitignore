@@ -1,5 +1,9 @@
-#data/
+# Ignore C++ compiled executables
 *.exe
 *.o
-.vscode/
-*.obj
+main
+
+# Ignore output folders
+output/
+data/output_openmp/
+data/output_threads/

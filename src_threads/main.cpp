@@ -12,8 +12,8 @@ namespace fs = std::filesystem;
 // IMPLEMENTATION (STB)
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "../include/stb_image.h"
-#include "../include/stb_image_write.h"
+#include "include/stb_image.h"
+#include "include/stb_image_write.h"
 
 // --- FILTER LOGIC ---
 
