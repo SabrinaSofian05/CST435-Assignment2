@@ -5,7 +5,7 @@
 * **Group:** Group 46
 * **Members:**
   1. Ain Nabihah Binti Mahamad Chah Pari (162321)
-  2. Jasmine Binti Mohd Shaiful Adli Chung(164191)
+  2. Jasmine Binti Mohd Shaiful Adli Chung (164191)
   3. Wan Nurmaisarah Binti Wan Muslim (164323)
   4. Sabrina Binti Sofian (164740)
 
