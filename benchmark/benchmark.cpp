@@ -83,7 +83,7 @@ int main() {
         cout << "\n>>>> TESTING SCALE: " << t << " THREAD(S) <<<<" << endl;
         
         // Test 1: C++ Std::Threads ---
-        cout << "[Test 1] Stf::Threads Running...:" << flush;
+        cout << "[Test 1] Std::Threads Running...:" << flush;
         RunStats thr = runAndGetStats("../src_threads/main_thr " + to_string(t));
         cout << "Done! (Time: " << thr.time << ", Images: " << thr.count << ")" << endl;
 
@@ -105,8 +105,8 @@ int main() {
 
     for (const auto& s : summaryList) {
         cout << "| " << left << setw(8) << s.threads 
-             << " | " << setw(18) << s.thrTime 
-             << " | " << setw(18) << s.ompTime << " |" << endl;
+             << " | " << setw(15) << s.thrTime 
+             << " | " << setw(15) << s.ompTime << " |" << endl;
     }
     cout << "+----------+-----------------+-----------------+" << endl;
     
