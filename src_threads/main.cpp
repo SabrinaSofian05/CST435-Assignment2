@@ -153,9 +153,9 @@ int main(int argc, char* argv[]) {
     // 1. Read Thread Count from Command Line (Required for Benchmark)
     int numThreads = (argc > 1) ? atoi(argv[1]) : 4;
 
-    std::string inputFolder = "images"; 
+    std::string inputFolder = "../data/images"; 
     // Create specific output folder for this run to keep things clean
-    std::string outputFolder = "output_threads_" + std::to_string(numThreads); 
+    std::string outputFolder = "../output/stdthread" + std::to_string(numThreads); 
     
     // Create output folder
     if (!fs::exists(outputFolder)) fs::create_directories(outputFolder);
