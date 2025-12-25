@@ -26,8 +26,8 @@ struct RunStats {
 // Stores the final comparison data for the summary table
 struct Summary {
     int threads;
-    string ompTime;
     string thrTime;
+    string ompTime;
 };
 
 // Improved helper to trim whitespace and carriage returns (important for Linux)
@@ -65,7 +65,7 @@ int main() {
     vector<Summary> summaryList;
 
     cout << "===========================================" << endl;
-    cout << "   PARALLEL EXECUTION BENCHMARK" << endl;
+    cout << "   PARALLEL EXECUTION BENCHMARK (GCP)" << endl;
     cout << "===========================================" << endl;
 
     /**
@@ -75,20 +75,20 @@ int main() {
      * -I../include: Links the STB image headers
      */
     cout << "Compiling implementations..." << endl;
-    system("g++ ../src_openmp/main.cpp -o ../src_openmp/main_omp -fopenmp -std=c++17 -I../include");
     system("g++ ../src_threads/main.cpp -o ../src_threads/main_thr -pthread -std=c++17 -I../include");
+    system("g++ ../src_openmp/main.cpp -o ../src_openmp/main_omp -fopenmp -std=c++17 -I../include");
 
     // Benchmarking loop
     for (int t : threadCounts) {
         cout << "\n>>>> TESTING SCALE: " << t << " THREAD(S) <<<<" << endl;
         
         // Test 1: C++ Std::Threads ---
-        cout << "[Test 1] C++ Threads Running...:" << endl;
+        cout << "[Test 1] Stf::Threads Running...:" << flush;
         RunStats thr = runAndGetStats("../src_threads/main_thr " + to_string(t));
         cout << "Done! (Time: " << thr.time << ", Images: " << thr.count << ")" << endl;
 
-        cout << "\nC++ Threads Implementation:" << endl;
-        RunStats omp = runAndGetStats("../src_omp/main_omp " + to_string(t));
+        cout << "\n[Test 2] OpenMP Running...:" << flush;
+        RunStats omp = runAndGetStats("../src_openmp/main_omp " + to_string(t));
         cout << "Done! (Time: " << omp.time << ", Images: " << omp.count << ")" << endl;
         cout << "-------------------------------------------" << endl;
 
@@ -100,13 +100,13 @@ int main() {
     cout << "          FINAL PERFORMANCE SUMMARY" << endl;
     cout << "===========================================" << endl;
     cout << "+----------+-----------------+-----------------+" << endl;
-    cout << "| Threads  | Std::Threads (s)|  OpenMP (S)     |" << endl;
+    cout << "| Threads  | Std::Threads (s)|  OpenMP (s)     |" << endl;
     cout << "+----------+-----------------+-----------------+" << endl;
 
     for (const auto& s : summaryList) {
         cout << "| " << left << setw(8) << s.threads 
-             << " | " << setw(15) << s.thrTime 
-             << " | " << setw(15) << s.ompTime << " |" << endl;
+             << " | " << setw(18) << s.thrTime 
+             << " | " << setw(18) << s.ompTime << " |" << endl;
     }
     cout << "+----------+-----------------+-----------------+" << endl;
     
