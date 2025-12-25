@@ -153,19 +153,19 @@ int main() {
         // Process loop
         for (auto& img : loadedImages) {
             runParallel(n, img.h, applyGrayscale, img.data, buffer, img.w, img.c);
-            stbi_write_jpg((outDir + "/gray_" + img.name).c_str(), img.w, img.h, img.c, buffer, 80);
+            //stbi_write_jpg((outDir + "/gray_" + img.name).c_str(), img.w, img.h, img.c, buffer, 80);
 
             runParallel(n, img.h, applyBlur, img.data, buffer, img.w, img.h, img.c);
-            stbi_write_jpg((outDir + "/blur_" + img.name).c_str(), img.w, img.h, img.c, buffer, 80);
+            //stbi_write_jpg((outDir + "/blur_" + img.name).c_str(), img.w, img.h, img.c, buffer, 80);
 
             runParallel(n, img.h, applyEdge, img.data, buffer, img.w, img.h, img.c);
-            stbi_write_jpg((outDir + "/edge_" + img.name).c_str(), img.w, img.h, img.c, buffer, 80);
+            //stbi_write_jpg((outDir + "/edge_" + img.name).c_str(), img.w, img.h, img.c, buffer, 80);
 
             runParallel(n, img.h, applySharpen, img.data, buffer, img.w, img.h, img.c);
-            stbi_write_jpg((outDir + "/sharp_" + img.name).c_str(), img.w, img.h, img.c, buffer, 80);
+            //stbi_write_jpg((outDir + "/sharp_" + img.name).c_str(), img.w, img.h, img.c, buffer, 80);
 
             runParallel(n, img.h, applyBrightness, img.data, buffer, img.w, img.h, img.c, 50);
-            stbi_write_jpg((outDir + "/bright_" + img.name).c_str(), img.w, img.h, img.c, buffer, 80);
+            //stbi_write_jpg((outDir + "/bright_" + img.name).c_str(), img.w, img.h, img.c, buffer, 80);
         }
 
         auto end = std::chrono::high_resolution_clock::now();
