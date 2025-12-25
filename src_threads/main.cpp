@@ -1,7 +1,12 @@
 /**
  * @file main.cpp
- * @brief Full Mode: Loops 1, 2, 4, 8 threads, SAVES IMAGES, and prints Performance Table.
- */
+ * @brief Parallel Image Processing using std::thread
+ * @course CST435: Parallel Computing
+ * * Objectives addressed:
+ * 1. Data decomposition using manual row-based chunking
+ * 2. Performance optimization via std::thread management
+ * 3. Benchmarking across varying thread counts on GCP
+*/
 
 #include <iostream>
 #include <vector>
@@ -35,6 +40,7 @@ void runParallel(int numThreads, int height, Func f, Args... args) {
 }
 
 // --- 2. FILTERS ---
+// 1. Grayscale Conversion: RGB -> Gray
 void applyGrayscale(const unsigned char* input, unsigned char* output, int width, int channels, int start, int end) {
     if (channels < 3) return;
     for (int y = start; y < end; ++y) {
@@ -46,7 +52,7 @@ void applyGrayscale(const unsigned char* input, unsigned char* output, int width
         }
     }
 }
-
+// Helper for Convolution (Used by Blur, Sharpen)
 void applyConvolution(const unsigned char* input, unsigned char* output, int width, int height, int channels, const float k[3][3], int start, int end) {
     for (int y = start; y < end; ++y) {
         if (y == 0 || y >= height - 1) continue;
@@ -63,17 +69,17 @@ void applyConvolution(const unsigned char* input, unsigned char* output, int wid
         }
     }
 }
-
+// 2. Gaussian Blur (3x3 Kernel)
 void applyBlur(const unsigned char* in, unsigned char* out, int w, int h, int c, int s, int e) {
     float k[3][3] = {{1/16.f, 2/16.f, 1/16.f}, {2/16.f, 4/16.f, 2/16.f}, {1/16.f, 2/16.f, 1/16.f}};
     applyConvolution(in, out, w, h, c, k, s, e);
 }
-
+// 3. Sharpening (3x3 Kernel)
 void applySharpen(const unsigned char* in, unsigned char* out, int w, int h, int c, int s, int e) {
     float k[3][3] = {{0, -1, 0}, {-1, 5, -1}, {0, -1, 0}};
     applyConvolution(in, out, w, h, c, k, s, e);
 }
-
+// 4. Edge Detection (Sobel Operator)
 void applyEdge(const unsigned char* input, unsigned char* output, int w, int h, int c, int s, int e) {
     int gx[3][3] = {{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}};
     int gy[3][3] = {{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}};
@@ -94,7 +100,7 @@ void applyEdge(const unsigned char* input, unsigned char* output, int w, int h, 
         }
     }
 }
-
+// 5. Brightness Adjustment
 void applyBrightness(const unsigned char* input, unsigned char* output, int w, int h, int c, int val, int s, int e) {
     for (int y = s; y < e; ++y) {
         for (int x = 0; x < w; ++x) {
@@ -169,7 +175,7 @@ int main() {
         std::cout << "Done! (" << diff.count() << "s)\n";
     }
 
-    // --- FINAL OUTPUT ---
+    // --- FINAL OUTPUT  ---
     std::cout << "\n===========================================\n";
     std::cout << "   PERFORMANCE SUMMARY (std::thread)\n";
     std::cout << "===========================================\n";
