@@ -75,8 +75,8 @@ int main() {
      * -I../include: Links the STB image headers
      */
     cout << "Compiling implementations..." << endl;
-    system("g++ ../src_threads/main.cpp -o ../src_threads/main_thr -pthread -std=c++17 -I../include");
-    system("g++ ../src_openmp/main.cpp -o ../src_openmp/main_omp -fopenmp -std=c++17 -I../include");
+    system("g++ -03 ../src_threads/main.cpp -o ../src_threads/main_thr -pthread -std=c++17 -I../include");
+    system("g++ -03 ../src_openmp/main.cpp -o ../src_openmp/main_omp -fopenmp -std=c++17 -I../include");
 
     // Benchmarking loop
     for (int t : threadCounts) {
