@@ -73,7 +73,7 @@ g++ main.cpp -o main -fopenmp -std=c++17 -I../include
 #### C++ Threads Implementation:
 ```bash
 cd /home/shared/CST435-Assignment2/src_threads
-g++ main.cpp -o main -pthread -std=c++17 -I../include
+g++ -O3 main.cpp -o main -pthread -std=c++17 -I../include
 ./main 4 #(4 threads)
 ```
 
