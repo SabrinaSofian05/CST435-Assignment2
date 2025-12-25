@@ -1,3 +1,12 @@
+/**
+ * @file benchmark.cpp
+ * @brief Automated Performance Analysis for OpenMP vs. C++ Std::Threads
+ * @course CST435: Parallel Computing
+ * * This script automates the execution of both parallel implementations 
+ * across varying thread counts (1, 2, 4, 8) and aggregates the results 
+ * into a formatted summary table for performance analysis.
+ */
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -8,11 +17,13 @@
 
 using namespace std;
 
+// Stores the extracted performance metrics from individual program runs
 struct RunStats {
     string time = "N/A";
     string count = "0";
 };
 
+// Stores the final comparison data for the summary table
 struct Summary {
     int threads;
     string ompTime;
@@ -36,10 +47,11 @@ RunStats runAndGetStats(string cmd) {
     string line;
     
     while (getline(file, line)) {
-        // Use find for case-insensitive-like matching or exact match
+        // Look for the total time reported by the high_resolution_clock in the main code
         if (line.find("TOTAL TIME:") != string::npos) {
             stats.time = cleanString(line.substr(line.find(":") + 1));
         }
+        // Verify the workload consistency by checking processed image count
         if (line.find("Images Processed:") != string::npos) {
             stats.count = cleanString(line.substr(line.find(":") + 1));
         }
@@ -53,31 +65,34 @@ int main() {
     vector<Summary> summaryList;
 
     cout << "===========================================" << endl;
-    cout << "   PARALLEL EXECUTION BENCHMARK (LINUX)" << endl;
+    cout << "   PARALLEL EXECUTION BENCHMARK" << endl;
     cout << "===========================================" << endl;
 
-    // --- CHANGE 1: Compile without .exe extension for Linux ---
+    /**
+     * Compilation Phase
+     * -fopenmp: Required for OpenMP directives
+     * -phthread: Required for C++ std::thread library
+     * -I../include: Links the STB image headers
+     */
     cout << "Compiling implementations..." << endl;
     system("g++ ../src_openmp/main.cpp -o ../src_openmp/main_omp -fopenmp -std=c++17 -I../include");
     system("g++ ../src_threads/main.cpp -o ../src_threads/main_thr -pthread -std=c++17 -I../include");
 
+    // Benchmarking loop
     for (int t : threadCounts) {
-        cout << "\n>>>> RUNNING WITH " << t << " THREAD(S) <<<<" << endl;
+        cout << "\n>>>> TESTING SCALE: " << t << " THREAD(S) <<<<" << endl;
         
-        // --- CHANGE 2: Use Forward Slashes (/) and remove .exe ---
-        // Also added "./" to ensure Linux looks in the correct relative path
-        cout << "OpenMP Implementation:" << endl;
-        RunStats omp = runAndGetStats("../src_openmp/main_omp " + to_string(t));
-        cout << "  - Images Processed: " << omp.count << endl;
-        cout << "  - Total Time      : " << omp.time << endl;
+        // Test 1: C++ Std::Threads ---
+        cout << "[Test 1] C++ Threads Running...:" << endl;
+        RunStats thr = runAndGetStats("../src_threads/main_thr " + to_string(t));
+        cout << "Done! (Time: " << thr.time << ", Images: " << thr.count << ")" << endl;
 
         cout << "\nC++ Threads Implementation:" << endl;
-        RunStats thr = runAndGetStats("../src_threads/main_thr " + to_string(t));
-        cout << "  - Images Processed: " << thr.count << endl;
-        cout << "  - Total Time      : " << thr.time << endl;
+        RunStats omp = runAndGetStats("../src_omp/main_omp " + to_string(t));
+        cout << "Done! (Time: " << omp.time << ", Images: " << omp.count << ")" << endl;
         cout << "-------------------------------------------" << endl;
 
-        summaryList.push_back({t, omp.time, thr.time});
+        summaryList.push_back({t, thr.time, omp.time});
     }
 
     // --- FINAL SUMMARY TABLE ---
@@ -85,17 +100,17 @@ int main() {
     cout << "          FINAL PERFORMANCE SUMMARY" << endl;
     cout << "===========================================" << endl;
     cout << "+----------+-----------------+-----------------+" << endl;
-    cout << "| Threads  | OpenMP Time     | Threads Time    |" << endl;
+    cout << "| Threads  | Std::Threads (s)|  OpenMP (S)     |" << endl;
     cout << "+----------+-----------------+-----------------+" << endl;
 
     for (const auto& s : summaryList) {
         cout << "| " << left << setw(8) << s.threads 
-             << " | " << setw(15) << s.ompTime 
-             << " | " << setw(15) << s.thrTime << " |" << endl;
+             << " | " << setw(15) << s.thrTime 
+             << " | " << setw(15) << s.ompTime << " |" << endl;
     }
     cout << "+----------+-----------------+-----------------+" << endl;
     
-    // --- CHANGE 3: Use 'rm' instead of 'del' for Linux ---
+    // Cleanup temporary files to leave the environment tidy
     system("rm temp_output.txt");
     return 0;
 }
