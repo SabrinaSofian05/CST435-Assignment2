@@ -84,10 +84,18 @@ g++ main.cpp -o main -pthread -std=c++17 -I../include
 ## 📂 Project Structure
 ```text
 CST435_Assignment2/
-├── benchmark/         # C++ Benchmark Manager to automate tests
-├── data/              # Input images (data/images)
-├── include/           # Header-only libraries (stb_image.h)
-├── output/            # Processed images (openmp/ and threads/)
-├── src_openmp/        # Source code for OpenMP implementation
-├── src_threads/       # Source code for std::thread implementation
-└── README.md          # Project documentation
+├── benchmark/           # Performance Analysis Tools
+│   └── benchmark.cpp    # Automation script for multi-thread testing
+├── data/                # Input Dataset
+│   └── images/          # Food-101 image subsets [cite: 20, 21]
+├── include/             # Third-party Libraries
+│   ├── stb_image.h      # Image loading library
+│   └── stb_image_write.h# Image saving library
+├── output/              # Processed Results
+│   ├── sample-images/   # Validated samples (IDs: 38795, 63651, 64846)
+├── src_openmp/          # OpenMP Implementation
+│   └── main.cpp         # Parallel filters using compiler directives
+├── src_threads/         # C++ std::thread Implementation
+│   └── main.cpp         # Parallel filters using manual thread management
+├── .gitignore           # Excludes large binaries and temp files 
+└── README.md            # Comprehensive project documentation

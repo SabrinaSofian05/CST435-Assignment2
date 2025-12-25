@@ -4,6 +4,4 @@
 main
 
 # Ignore output folders
-output/
-data/output_openmp/
-data/output_threads/
+temp_output.txt
