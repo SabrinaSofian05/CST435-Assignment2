@@ -1,12 +1,8 @@
 /**
  * @file main.cpp
- * @brief Parallel Image Processing using std::thread
+ * @brief Parallel Image Processing using std::thread - Sequential Pipeline
  * @course CST435: Parallel Computing
- * * Objectives addressed:
- * 1. Data decomposition using manual row-based chunking
- * 2. Performance optimization via std::thread management
- * 3. Benchmarking across varying thread counts on GCP
-*/
+ */
 
 #include <iostream>
 #include <vector>
@@ -18,6 +14,7 @@
 #include <chrono>
 
 // STB Image Libraries
+// Ensure stb_image.h and stb_image_write.h are in the ../include/ folder
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "../include/stb_image.h"
@@ -27,7 +24,7 @@ namespace fs = std::filesystem;
 using namespace std;
 
 // ==========================================
-//            PARALLEL HELPER 
+//             PARALLEL HELPER 
 // ==========================================
 template<typename Func, typename... Args>
 void runParallel(int numThreads, int height, Func f, Args... args) {
@@ -150,20 +147,18 @@ void applyBrightness(const unsigned char* input, unsigned char* output, int widt
 // MAIN BATCH PROCESSOR
 // ==========================================
 int main(int argc, char* argv[]) {
-    // 1. Read Thread Count from Command Line (Required for Benchmark)
+    // 1. Read Thread Count from Command Line
     int numThreads = (argc > 1) ? atoi(argv[1]) : 4;
 
     std::string inputFolder = "../data/images"; 
-    // Create specific output folder for this run to keep things clean
-    std::string outputFolder = "../output/stdthread" + std::to_string(numThreads); 
+    // Create output folder for combined results
+    std::string outputFolder = "../output/combined_" + std::to_string(numThreads) + "threads"; 
     
-    // Create output folder
     if (!fs::exists(outputFolder)) fs::create_directories(outputFolder);
 
     // --- UI HEADER  ---
     std::cout << "===========================================" << std::endl;
-    std::cout << "   STARTING BATCH PROCESSOR (" << numThreads << " Threads)" << std::endl;
-    std::cout << "   [Std::Thread Implementation]" << std::endl;
+    std::cout << "   STARTING PIPELINE PROCESSOR (" << numThreads << " Threads)" << std::endl;
     std::cout << "===========================================" << std::endl;
 
     if (!fs::exists(inputFolder)) {
@@ -174,18 +169,27 @@ int main(int argc, char* argv[]) {
     auto start = std::chrono::high_resolution_clock::now();
     int fileCount = 0;
 
-    // Large buffer allocation
-    unsigned char* outputImg = (unsigned char*)malloc(4000 * 4000 * 4);
-    unsigned char* grayImg = (unsigned char*)malloc(4000 * 4000 * 4); 
+    // --- PIPELINE BUFFERS ---
+    // Buffer A and Buffer B allow us to swap input/output between steps without race conditions
+    // 4000x4000x4 is a safe size for most standard images; adjust if processing 4K/8K images.
+    unsigned char* bufferA = (unsigned char*)malloc(4000 * 4000 * 4);
+    unsigned char* bufferB = (unsigned char*)malloc(4000 * 4000 * 4); 
+
+    if (!bufferA || !bufferB) {
+        std::cout << "Memory allocation failed!" << std::endl;
+        return 1;
+    }
 
     // BATCH LOOP
     for (const auto& entry : fs::directory_iterator(inputFolder)) {
         std::string path = entry.path().string();
         std::string filename = entry.path().filename().string();
         
-        if (path.find(".jpg") == std::string::npos && path.find(".jpeg") == std::string::npos && path.find(".png") == std::string::npos) continue;
+        // Simple extension check
+        if (path.find(".jpg") == std::string::npos && 
+            path.find(".jpeg") == std::string::npos && 
+            path.find(".png") == std::string::npos) continue;
 
-        // --- PRINT PROGRESS ---
         std::cout << "Processing: " << filename << " ... " << std::flush;
 
         int width, height, channels;
@@ -194,34 +198,36 @@ int main(int argc, char* argv[]) {
 
         fileCount++;
 
-        // --- Execute Filters ---
+        // --- PIPELINE EXECUTION ---
+        // Logic: Input -> BufferA -> BufferB -> BufferA ... -> Final Save
 
-        // 1. Grayscale
-        runParallel(numThreads, height, applyGrayscale, img, grayImg, width, channels);
-        // stbi_write_jpg((outputFolder + "/gray_" + filename).c_str(), width, height, channels, grayImg, 90);
+        // Step 1: Grayscale (Input: Original img -> Output: bufferA)
+        runParallel(numThreads, height, applyGrayscale, img, bufferA, width, channels);
 
-        // 2. Blur
-        runParallel(numThreads, height, applyBlur, img, outputImg, width, height, channels);
-        // stbi_write_jpg((outputFolder + "/blur_" + filename).c_str(), width, height, channels, outputImg, 90);
+        // Step 2: Blur (Input: bufferA -> Output: bufferB)
+        runParallel(numThreads, height, applyBlur, bufferA, bufferB, width, height, channels);
 
-        // 3. Edge (Sobel)
-        runParallel(numThreads, height, applyEdge, img, outputImg, width, height, channels);
-        // stbi_write_jpg((outputFolder + "/edge_" + filename).c_str(), width, height, channels, outputImg, 90);
+        // Step 3: Sharpen (Input: bufferB -> Output: bufferA)
+        runParallel(numThreads, height, applySharpen, bufferB, bufferA, width, height, channels);
 
-        // 4. Sharpen
-        runParallel(numThreads, height, applySharpen, img, outputImg, width, height, channels);
-        // stbi_write_jpg((outputFolder + "/sharp_" + filename).c_str(), width, height, channels, outputImg, 90);
+        // Step 4: Edge/Sobel (Input: bufferA -> Output: bufferB)
+        runParallel(numThreads, height, applyEdge, bufferA, bufferB, width, height, channels);
 
-        // 5. Brightness
-        runParallel(numThreads, height, applyBrightness, img, outputImg, width, height, channels, 50);
-        // stbi_write_jpg((outputFolder + "/bright_" + filename).c_str(), width, height, channels, outputImg, 90);
+        // Step 5: Brightness (Input: bufferB -> Output: bufferA)
+        // Note: The final result ends up in BufferA
+        runParallel(numThreads, height, applyBrightness, bufferB, bufferA, width, height, channels, 50);
+
+        // --- SAVE FINAL RESULT ---
+        // Save the content of bufferA (which holds the result of step 5)
+        std::string savePath = outputFolder + "/final_" + filename;
+        stbi_write_jpg(savePath.c_str(), width, height, channels, bufferA, 90);
 
         stbi_image_free(img);
         std::cout << "Done." << std::endl;
     }
 
-    free(outputImg);
-    free(grayImg);
+    free(bufferA);
+    free(bufferB);
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - start;
