@@ -42,7 +42,11 @@ void applyGrayscale(const unsigned char* input, unsigned char* output, int width
         int g = input[i * channels + 1];
         int b = input[i * channels + 2];
         // Luminance formula
-        output[i] = (unsigned char)(0.299f * r + 0.587f * g + 0.114f * b);
+        unsigned char gray = (unsigned char)(0.299f * r + 0.587f * g + 0.114f * b);
+        output[i * channels] = gray;
+        output[i * channels + 1] = gray;
+        output[i * channels + 2] = gray;
+        if (channels == 4) output[i * channels + 3] = input[i * channels + 3];
     }
 }
 
@@ -122,7 +126,7 @@ void applyBrightness(unsigned char* input, unsigned char* output, int width, int
 }
 
 // ==========================================
-// MAIN BATCH PROCESSOR
+// MAIN BATCH PIPELINE PROCESSOR
 // ==========================================
 int main(int argc, char* argv[]) {
     std::string inputFolder = "../data/images"; // input folder
@@ -141,12 +145,23 @@ int main(int argc, char* argv[]) {
     std::cout << "   [OpenMP Implementation]" << std::endl;
     std::cout << "===========================================" << std::endl;
 
+    if (!fs::exists(inputFolder)) {
+        std::cout << "Error: Input folder '" << inputFolder << "' not found." << std::endl;
+        return 1;
+    }
+
     auto start = std::chrono::high_resolution_clock::now();
     int fileCount = 0;
 
-    // Set and allocate large buffer to avoid malloc overhead
-    unsigned char* outputImg = (unsigned char*)malloc(4000 * 4000 * 4);
-    unsigned char* grayImg = (unsigned char*)malloc(4000 * 4000);
+    // Allocae two large buffers to swap between them (Supports up to 4K resolution images)
+    size_t bufferSize = 4000 * 4000 * 4; // width * height * max channels
+    unsigned char* bufferA = (unsigned char*)malloc(bufferSize);
+    unsigned char* bufferB = (unsigned char*)malloc(bufferSize);
+
+    if (!bufferA || !bufferB) {
+        std::cout << "Memory allocation failed!" << std::endl;
+        return 1;
+    }
 
     // BATCH LOOP: Processes each dataset sequentially
     for (const auto& entry : fs::directory_iterator(inputFolder)) {
@@ -168,37 +183,40 @@ int main(int argc, char* argv[]) {
         unsigned char* img = stbi_load(path.c_str(), &width, &height, &channels, 0);
         if (!img) { std::cout << "Failed to load!" << std::endl; continue; }
 
-        fileCount++;
+        // --- THE PIPELINE SEQUENCE ---
 
-        // --- Execute and Write Filters ---
-
-        // 1. Grayscale (Save as 1 channel JPG)
-        applyGrayscale(img, grayImg, width, height, channels);
+        // 1. Grayscale (image -> buffer A)
+        applyGrayscale(img, bufferA, width, height, channels);
         //stbi_write_jpg((outputFolder + "/" + baseName + "_grayscale" + ext).c_str(), width, height, 1, grayImg, 100);
 
-        // 2. Blur
-        applyBlur(img, outputImg, width, height, channels);
+        // 2. Blur (buffer A -> buffer B)
+        applyBlur(bufferA, bufferB, width, height, channels);
         //stbi_write_jpg((outputFolder + "/" + baseName + "_blur" + ext).c_str(), width, height, channels, outputImg, 100);
 
-        // 3. Edge (Sobel)
-        applyEdge(img, outputImg, width, height, channels);
+        // 3. Edge (Sobel) (buffer B -> buffer A)
+        applyEdge(bufferB, bufferA, width, height, channels);
         //stbi_write_jpg((outputFolder + "/" + baseName + "_edge" + ext).c_str(), width, height, channels, outputImg, 100);
 
-        // 4. Sharpen
-        applySharpen(img, outputImg, width, height, channels);
+        // 4. Sharpen (buffer A -> buffer B)
+        applySharpen(bufferA, bufferB, width, height, channels);
         //stbi_write_jpg((outputFolder + "/" + baseName + "_sharpen" + ext).c_str(), width, height, channels, outputImg, 100);
 
-        // 5. Brightness
-        applyBrightness(img, outputImg, width, height, channels, 50);
+        // 5. Brightness (buffer B -> buffer A)
+        applyBrightness(bufferB, bufferA, width, height, channels, 50);
         //stbi_write_jpg((outputFolder + "/" + baseName + "_bright" + ext).c_str(), width, height, channels, outputImg, 100);
+
+        // Save final result from the last active buffer (bufferA)
+        string outPath = outputFolder + "/" + baseName + "_output.jpg";
+        //stbi_write_jpg(outPath.c_str(), width, height, channels, bufferA, 100);
 
         // Cleanup
         stbi_image_free(img);
+        fileCount++; 
         std::cout << "Done." << std::endl;
     }
 
-    free(outputImg);
-    free(grayImg);
+    free(bufferA);
+    free(bufferB);
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - start;

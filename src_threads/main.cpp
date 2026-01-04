@@ -150,15 +150,15 @@ int main(int argc, char* argv[]) {
     // 1. Read Thread Count from Command Line
     int numThreads = (argc > 1) ? atoi(argv[1]) : 4;
 
-    std::string inputFolder = "../data/images"; 
-    // Create output folder for combined results
-    std::string outputFolder = "../output/combined_" + std::to_string(numThreads) + "threads"; 
+    std::string inputFolder = "../data/images"; // input folder
+    std::string outputFolder = "../output/threads";  // output folder
     
     if (!fs::exists(outputFolder)) fs::create_directories(outputFolder);
 
     // --- UI HEADER  ---
     std::cout << "===========================================" << std::endl;
-    std::cout << "   STARTING PIPELINE PROCESSOR (" << numThreads << " Threads)" << std::endl;
+    std::cout << "   STARTING BATCH PROCESSOR (" << numThreads << " Threads)" << std::endl;
+    std::cout << "   [C++ Threads Implementation]" << std::endl;
     std::cout << "===========================================" << std::endl;
 
     if (!fs::exists(inputFolder)) {
@@ -172,8 +172,9 @@ int main(int argc, char* argv[]) {
     // --- PIPELINE BUFFERS ---
     // Buffer A and Buffer B allow us to swap input/output between steps without race conditions
     // 4000x4000x4 is a safe size for most standard images; adjust if processing 4K/8K images.
-    unsigned char* bufferA = (unsigned char*)malloc(4000 * 4000 * 4);
-    unsigned char* bufferB = (unsigned char*)malloc(4000 * 4000 * 4); 
+    size_t bufferSize = 4000 * 4000 * 4; // width * height * max channels
+    unsigned char* bufferA = (unsigned char*)malloc(bufferSize);
+    unsigned char* bufferB = (unsigned char*)malloc(bufferSize);
 
     if (!bufferA || !bufferB) {
         std::cout << "Memory allocation failed!" << std::endl;
@@ -195,8 +196,6 @@ int main(int argc, char* argv[]) {
         int width, height, channels;
         unsigned char* img = stbi_load(path.c_str(), &width, &height, &channels, 0);
         if (!img) { std::cout << "Failed to load!" << std::endl; continue; }
-
-        fileCount++;
 
         // --- PIPELINE EXECUTION ---
         // Logic: Input -> BufferA -> BufferB -> BufferA ... -> Final Save
@@ -220,9 +219,10 @@ int main(int argc, char* argv[]) {
         // --- SAVE FINAL RESULT ---
         // Save the content of bufferA (which holds the result of step 5)
         std::string savePath = outputFolder + "/final_" + filename;
-        stbi_write_jpg(savePath.c_str(), width, height, channels, bufferA, 90);
+        //stbi_write_jpg(savePath.c_str(), width, height, channels, bufferA, 90);
 
         stbi_image_free(img);
+        fileCount++; 
         std::cout << "Done." << std::endl;
     }
 
